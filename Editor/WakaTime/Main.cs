@@ -6,238 +6,238 @@ using System.Collections.Generic;
 
 namespace WakaTime
 {
-	[InitializeOnLoad]
-	public class Main
-	{
-		const string KEY_ENABLED = "wakatime_enabled";
-		const string KEY_DEBUG = "wakatime_debug";
-		public const string KEY_API_KEY = "wakatime_api_key";
+    [InitializeOnLoad]
+    public static class Main
+    {
+        const string KEY_ENABLED = "wakatime_enabled";
+        const string KEY_DEBUG = "wakatime_debug";
+        public const string KEY_API_KEY = "wakatime_api_key";
 
-		private static string currentScene;
-
-
-		static string _apiKey = null;
-		public static string ApiKey
-		{
-			get
-			{
-				if (_apiKey == null)
-				{
-					_apiKey = EditorPrefs.GetString(KEY_API_KEY, "");
-				}
-
-				return _apiKey;
-			}
-			set
-			{
-				_apiKey = value;
-				EditorPrefs.SetString(KEY_API_KEY, value);
-
-				CheckAPIKey();
-			}
-		}
-
-		static bool _enabled = false;
-		public static bool IsEnabled
-		{
-			get
-			{
-				return _enabled;
-			}
-			set
-			{
-				_enabled = value;
-				EditorPrefs.SetBool(KEY_ENABLED, value);
-
-				if (value)
-				{
-					Check();
-				}
-			}
-		}
-
-		static Boolean _debug = false;
-		public static bool IsDebug
-		{
-			get
-			{
-				return _debug;
-			}
-			set
-			{
-				_debug = value;
-				EditorPrefs.SetBool(KEY_DEBUG, value);
-			}
-		}
-
-		static Dictionary<string, DateTime> fileTimes = new Dictionary<string, DateTime>();
-
-		public static string GetProjectPath()
-		{
-			return Application.dataPath + "/../";
-		}
-
-		static Main()
-		{
-			_enabled = EditorPrefs.GetBool(KEY_ENABLED, true);
-			_debug = EditorPrefs.GetBool(KEY_DEBUG, false);
-
-			currentScene = EditorApplication.currentScene;
-			EditorApplication.hierarchyWindowChanged += OnWindowChanged;
-
-			Check();
-		}
+        static string currentScene;
 
 
+        static string _apiKey;
+        public static string ApiKey
+        {
+            get
+            {
+                if (_apiKey == null)
+                {
+                    _apiKey = EditorPrefs.GetString(KEY_API_KEY, "");
+                }
 
-		private static void OnWindowChanged()
-		{
-			if (currentScene != EditorApplication.currentScene)
-			{
-				currentScene = EditorApplication.currentScene;
+                return _apiKey;
+            }
+            set
+            {
+                _apiKey = value;
+                EditorPrefs.SetString(KEY_API_KEY, value);
 
-				// Current scene changed
-				OnSceneChanged(GetProjectPath() + currentScene);
-			}
-		}
+                CheckAPIKey();
+            }
+        }
 
-		public static bool Check()
-		{
-			bool res = false;
+        static bool _enabled;
+        public static bool IsEnabled
+        {
+            get
+            {
+                return _enabled;
+            }
+            set
+            {
+                _enabled = value;
+                EditorPrefs.SetBool(KEY_ENABLED, value);
 
-			if (CheckAPIKey())
-			{
-				res = CheckPython();
-			}
+                if (value)
+                {
+                    Check();
+                }
+            }
+        }
 
-			return res;
-		}
+        static bool _debug;
+        public static bool IsDebug
+        {
+            get
+            {
+                return _debug;
+            }
+            set
+            {
+                _debug = value;
+                EditorPrefs.SetBool(KEY_DEBUG, value);
+            }
+        }
 
-		public static bool CheckAPIKey()
-		{
-			bool res = true;
-			string key = GetApiKey();
+        static readonly Dictionary<string, DateTime> fileTimes = new Dictionary<string, DateTime>();
 
-			if (IsEnabled)
-			{
-				if (key == null || key.Equals(""))
-				{
-					if (!Window.IsFocused())
-					{
-						if (EditorUtility.DisplayDialog("WakaTime API Key required", "You need to insert your API Key so as tu use this Plugin", "Insert API Key", "Disable Wakatime"))
-						{
-							Window.GetWindow().Show();
-							Window.GetWindow().Focus();
-						}
-						else {
-							IsEnabled = false;
-						}
-					}
+        public static string GetProjectPath()
+        {
+            return Application.dataPath + "/../";
+        }
 
-					res = false;
-				}
-			}
-			else {
-				res = false;
-			}
+        static Main()
+        {
+            _enabled = EditorPrefs.GetBool(KEY_ENABLED, true);
+            _debug = EditorPrefs.GetBool(KEY_DEBUG, false);
 
-			return res;
-		}
+            currentScene = EditorApplication.currentScene;
+            EditorApplication.hierarchyWindowChanged += OnWindowChanged;
 
-		public static bool CheckPython()
-		{
-			bool isInstalled = PythonManager.IsPythonInstalled();
+            Check();
+        }
 
-			if (IsEnabled && !isInstalled && !PythonInstaller.IsInstalling())
-			{
-				if (EditorUtility.DisplayDialog("Python is required", "The plugin is about to install Python. Do you want to continue?", "Install Python", "Disable Wakatime"))
-				{
-					PythonInstaller.DownloadAndInstall();
-				}
-				else {
-					IsEnabled = false;
-				}
-			}
 
-			return isInstalled;
-		}
 
-		public static string GetProjectName()
-		{
-			string[] s = Application.dataPath.Split('/');
-			string projectName = s[s.Length - 2];
+        private static void OnWindowChanged()
+        {
+            if (currentScene != EditorApplication.currentScene)
+            {
+                currentScene = EditorApplication.currentScene;
 
-			return projectName;
-		}
+                // Current scene changed
+                OnSceneChanged(GetProjectPath() + currentScene);
+            }
+        }
 
-		public static string GetApiKey()
-		{
-			return EditorPrefs.GetString(KEY_API_KEY);
-		}
+        public static bool Check()
+        {
+            bool res = false;
 
-		public static void OnSceneChanged(string path)
-		{
-			RequestSendFile(path, false);
-		}
+            if (CheckAPIKey())
+            {
+                res = CheckPython();
+            }
 
-		public static void OnAssetChanged(string path)
-		{
-			RequestSendFile(path, false);
-		}
+            return res;
+        }
 
-		public static void OnAssetSaved(string path)
-		{
-			RequestSendFile(path, true);
-		}
+        public static bool CheckAPIKey()
+        {
+            bool res = true;
+            string key = GetApiKey();
 
-		static void RequestSendFile(string path, bool write = false)
-		{
-			if (Check() && ShouldSendFile(path))
-			{
-				ClientManager.HeartBeat(GetApiKey(), path, write);
-			}
-		}
+            if (IsEnabled)
+            {
+                if (key == null || key.Equals(""))
+                {
+                    if (!Window.IsFocused())
+                    {
+                        if (EditorUtility.DisplayDialog("WakaTime API Key required", "You need to insert your API Key so as tu use this Plugin", "Insert API Key", "Disable Wakatime"))
+                        {
+                            Window.GetWindow().Show();
+                            Window.GetWindow().Focus();
+                        }
+                        else {
+                            IsEnabled = false;
+                        }
+                    }
 
-		static bool ShouldSendFile(string path)
-		{
-			// Contains this Plugin?
-			if (path.Contains("Assets/Editor/WakaTime"))
-			{
-				return false;
-			}
+                    res = false;
+                }
+            }
+            else {
+                res = false;
+            }
 
-			bool res = true;
-			if (fileTimes.ContainsKey(path))
-			{
-				DateTime time;
+            return res;
+        }
 
-				fileTimes.TryGetValue(path, out time);
+        public static bool CheckPython()
+        {
+            bool isInstalled = PythonManager.IsPythonInstalled();
 
-				double diffInSeconds = (DateTime.Now - time).TotalSeconds;
+            if (IsEnabled && !isInstalled && !PythonInstaller.IsInstalling())
+            {
+                if (EditorUtility.DisplayDialog("Python is required", "The plugin is about to install Python. Do you want to continue?", "Install Python", "Disable Wakatime"))
+                {
+                    PythonInstaller.DownloadAndInstall();
+                }
+                else {
+                    IsEnabled = false;
+                }
+            }
 
-				if (diffInSeconds < WakaTimeConstants.TIME_TO_HEARTBEAT)
-				{
-					res = false;
-				}
-			}
+            return isInstalled;
+        }
 
-			if (res)
-			{
-				// update current time
-				if (fileTimes.ContainsKey(path))
-				{
-					fileTimes.Remove(path);
-				}
+        public static string GetProjectName()
+        {
+            string[] s = Application.dataPath.Split('/');
+            string projectName = s[s.Length - 2];
 
-				fileTimes.Add(path, DateTime.Now);
-			}
+            return projectName;
+        }
 
-			if (IsEnabled && IsDebug)
-			{
-				Debug.Log("Should send " + path.Substring(path.LastIndexOf("/") + 1) + "? [" + (res ? "yes" : "no") + "]");
-			}
+        public static string GetApiKey()
+        {
+            return EditorPrefs.GetString(KEY_API_KEY);
+        }
 
-			return res;
-		}
-	}
+        public static void OnSceneChanged(string path)
+        {
+            RequestSendFile(path, false);
+        }
+
+        public static void OnAssetChanged(string path)
+        {
+            RequestSendFile(path, false);
+        }
+
+        public static void OnAssetSaved(string path)
+        {
+            RequestSendFile(path, true);
+        }
+
+        static void RequestSendFile(string path, bool write = false)
+        {
+            if (Check() && ShouldSendFile(path))
+            {
+                ClientManager.HeartBeat(GetApiKey(), path, write);
+            }
+        }
+
+        static bool ShouldSendFile(string path)
+        {
+            // Contains this Plugin?
+            if (path.Contains("Assets/Editor/WakaTime"))
+            {
+                return false;
+            }
+
+            bool res = true;
+            if (fileTimes.ContainsKey(path))
+            {
+                DateTime time;
+
+                fileTimes.TryGetValue(path, out time);
+
+                double diffInSeconds = (DateTime.Now - time).TotalSeconds;
+
+                if (diffInSeconds < WakaTimeConstants.TIME_TO_HEARTBEAT)
+                {
+                    res = false;
+                }
+            }
+
+            if (res)
+            {
+                // update current time
+                if (fileTimes.ContainsKey(path))
+                {
+                    fileTimes.Remove(path);
+                }
+
+                fileTimes.Add(path, DateTime.Now);
+            }
+
+            if (IsEnabled && IsDebug)
+            {
+                Debug.Log("Should send " + path.Substring(path.LastIndexOf("/", StringComparison.Ordinal) + 1) + "? [" + (res ? "yes" : "no") + "]");
+            }
+
+            return res;
+        }
+    }
 }
