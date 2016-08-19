@@ -39,6 +39,12 @@
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="System.Xml" />
+		<Reference Include="INIFileParser">
+		  <HintPath>packages\ini-parser.2.2.4\lib\net20\INIFileParser.dll</HintPath>
+		</Reference>
+		<Reference Include="WakaTime">
+		  <HintPath>packages\WakaTime.8.0.7\lib\net45\WakaTime.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="Properties\AssemblyInfo.cs" />
@@ -50,6 +56,9 @@
 		<Compile Include="Editor\WakaTime\PythonManager.cs" />
 		<Compile Include="Editor\WakaTime\SceneDirtyChecker.cs" />
 		<Compile Include="Editor\WakaTime\Window.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="packages.config" />
 	</ItemGroup>
 	<Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
