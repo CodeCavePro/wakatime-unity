@@ -3,14 +3,14 @@ using UnityEditor;
 
 namespace WakaTime
 {
-    public class Window : EditorWindow
+    public class SettingWindow : EditorWindow
     {
         const string WAKATIME_URL = "https://wakatime.com/";
 
         [MenuItem("Window/WakaTime")]
         public static void ShowWindow()
         {
-            GetWindow(typeof(Window));
+            GetWindow(typeof(SettingWindow));
         }
 
         void OnGUI()
@@ -25,29 +25,30 @@ namespace WakaTime
             EditorGUILayout.Separator();
 
             Main.IsEnabled = EditorGUILayout.Toggle("Enabled", Main.IsEnabled);
+
             EditorGUILayout.Separator();
 
 
-            Main.ApiKey = EditorGUILayout.TextField("API key", Main.ApiKey);
-            if (Main.IsEnabled && Main.ApiKey == null || "".Equals(Main.ApiKey))
+            WakaTimeConfigFile.ApiKey = EditorGUILayout.TextField("API key", WakaTimeConfigFile.ApiKey);
+            if (Main.IsEnabled && (WakaTimeConfigFile.ApiKey == null || string.IsNullOrEmpty(WakaTimeConfigFile.ApiKey)))
             {
                 EditorGUILayout.HelpBox("API Key is required", MessageType.Error, false);
             }
 
             EditorGUILayout.Separator();
 
-            Main.IsDebug = EditorGUILayout.Toggle("Debug", Main.IsDebug);
+            WakaTimeConfigFile.Debug = EditorGUILayout.Toggle("Debug", WakaTimeConfigFile.Debug);
             EditorGUILayout.HelpBox("Debug messages will appear in the console if this option is enabled. Mostly used for test purposes.", MessageType.Info, true);
         }
 
         public static bool IsFocused()
         {
-            return focusedWindow is Window;
+            return focusedWindow is SettingWindow;
         }
 
         public static EditorWindow GetWindow()
         {
-            return GetWindow(typeof(Window));
+            return GetWindow(typeof(SettingWindow));
         }
     }
 }

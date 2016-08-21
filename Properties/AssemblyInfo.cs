@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 
 // Information about this assembly is defined by the following attributes. 
 // Change them to the values specific to your project.
+using System.Runtime.Versioning;
 
 [assembly: AssemblyTitle("WakaTime.Unity")]
 [assembly: AssemblyDescription("WakaTime is a productivity & time tracking tool for programmers. Once the WakaTime plugin is installed, you get a dashboard with reports about your programming by time, language, project, and branch.")]

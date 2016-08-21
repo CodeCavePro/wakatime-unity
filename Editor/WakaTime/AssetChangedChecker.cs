@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using System.Linq;
 
 namespace WakaTime
 {
@@ -6,26 +7,18 @@ namespace WakaTime
     {
         static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
         {
-            foreach (var str in importedAssets)
+            foreach (var assetName in importedAssets)
             {
-                Main.OnAssetSaved(Main.GetProjectPath() + str);
-
-                // Debug.Log ("Reimported Asset: " + str);
-
-            }
-            foreach (var str in deletedAssets)
-            {
-                Main.OnAssetChanged(Main.GetProjectPath() + str);
-
+                Main.OnAssetSaved(assetName);
             }
 
-            foreach (var str in movedAssets)
+            var assetNames = deletedAssets.Concat(movedAssets);
+            assetNames = assetNames.Concat(movedFromAssetPaths);
+            assetNames = assetNames.Distinct();
+
+            foreach (var assetName in assetNames)
             {
-                Main.OnAssetChanged(Main.GetProjectPath() + str);
-            }
-            foreach (var str in movedFromAssetPaths)
-            {
-                Main.OnAssetChanged(Main.GetProjectPath() + str);
+                Main.OnAssetChanged(assetName);
             }
         }
     }
